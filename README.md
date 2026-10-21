@@ -1,3 +1,5 @@
+Example of how to make the README template for this project to look like mine **README_TEMPLATE**[https://github.com/Makster04/FINAL_CAPSTONE_PROJECT/blob/main/README.md]
+
 # [Project Title]: [The One-Line Question Your Model Answers]
 
 **DATS 6103 – Introduction to Data Mining · Team Project · Fall 2026**
