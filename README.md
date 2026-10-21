@@ -10,7 +10,7 @@ It should cover, in roughly this order:
 - limitations specific to your data, not generic ones
 
 
-# Predicting Next Quarter's Economic Regime from Lagged Macro Indicators
+# [Project Title]: [The Question Your Model Answers]
 
 **DATS 6103 – Introduction to Data Mining · Team Project · Fall 2026**
 **Team:** [Name 1] · [Name 2] · [Name 3]
@@ -21,11 +21,12 @@ It should cover, in roughly this order:
 
 ## The Question
 
-Can lagged macroeconomic indicators predict whether the U.S. economy will be in **Boom, Stability, Slowdown, or Recession** next quarter?
+[One or two sentences: what is being predicted or discovered.]
 
-- **For whom:** corporate finance leaders (CFOs) setting budgets and hiring plans.
-- **The decision it changes:** whether to tighten spending and hiring ahead of a downturn, or hold course.
-- **The costlier mistake:** missing a coming Recession. A false alarm means caution that turns out to be unnecessary; a missed recession means being caught over-extended. Models are therefore judged mainly on **Recession recall and F1**, not overall accuracy.
+- **For whom:** [who uses the answer]
+- **The decision it changes:** [what they would do differently with it]
+- **The costlier mistake:** [which error matters more, and why]
+- **Primary metric:** [Recall / F1 / PR-AUC / RMSE / MAE], chosen because [it reflects the costlier mistake]
 
 ---
 
@@ -33,21 +34,15 @@ Can lagged macroeconomic indicators predict whether the U.S. economy will be in 
 
 | | |
 |---|---|
-| **Sources** | Federal Reserve Economic Data (FRED); Bureau of Labor Statistics (BLS) |
-| **Coverage** | 1970–2024, quarterly |
-| **One row is** | one quarter |
-| **Size** | ~220 quarters × 30+ indicators |
-| **Target** | regime label in `Regime_Labels.csv`, defined by [labeling rule] |
-
-Files in `data/`:
-- `Prediction_Indicators.csv` — the indicators as downloaded
-- `lags.csv` — lagged versions of each indicator, built by `src/build_features.py`
-- `Regime_Labels.csv` — the target, built by `[script]` using [labeling rule]
+| **Source** | [Dataset name](link) |
+| **How to get it** | [Committed in `data/raw/`] or [run `python src/get_data.py`] |
+| **Size** | [N rows × M columns] |
+| **One row is** | [one loan application / one patient visit / one county-year / …] |
+| **Target** | `[column_name]` |
 
 ### What's missing from it
-- **Real-time data.** FRED serves revised figures. A forecaster in 2007 saw first-release numbers that were later revised, so the model learns from information nobody had at the time.
-- **Recessions.** 1970–2024 contains only a handful of recession episodes, so the Recession class is small and the test period holds only [n] recession quarters.
-- [Indicators that begin after 1970 and are mostly imputed in early years]
+- [Who or what is not in the data: populations, time periods, variables you would want]
+- [Missingness in key columns, and whether it looks random or systematic]
 
 ---
 
@@ -55,19 +50,20 @@ Files in `data/`:
 
 | Step | What we did | Why |
 |------|-------------|-----|
-| Merge | Joined the three files on `observation_date` | One row per quarter |
-| Clean | Dropped duplicate rows and fully empty columns | — |
-| Features | 25+ per quarter: lags (1–4 quarters), rolling means and standard deviations, stress flags | Regime shifts build over several quarters |
-| Missing values | Filled with column means **computed on the training window only** | Keeps later values from leaking into earlier quarters |
+| Train/test split | [80/20, stratified on target; or time-based if temporal] | [...] |
+| Dropped columns | [IDs, post-outcome / leaky fields] | [...] |
+| Missing values | [median imputation], fitted on training data only | [...] |
+| Encoding / scaling | [one-hot, StandardScaler], fitted on training data only | [...] |
+| Feature engineering | [...] | [...] |
 
-All fitted steps (imputation, scaling) sit inside a scikit-learn `Pipeline` and are refit on each training window.
+All fitted steps sit inside a scikit-learn `Pipeline`, so they never see the test set.
 
 ---
 
 ## Exploration
 
-- [How often each regime occurs, and how rare Recession is]
-- [Which indicators visibly move before regime changes]
+- [Target distribution / class balance]
+- [Strongest relationships with the target]
 - [Anything that shaped the modeling choices]
 
 ---
@@ -75,50 +71,47 @@ All fitted steps (imputation, scaling) sit inside a scikit-learn `Pipeline` and 
 ## Models and Evaluation
 
 ### Baseline
-Predict the most common regime ([Stability]) every quarter → Recession recall = 0, accuracy = [x].
+[Majority class ("[class]") / mean of target] → [primary metric] = [x]
 
 ### Models
 | Model | Why it suits the question |
 |-------|---------------------------|
-| Multinomial logistic regression | Interpretable coefficients; tests whether a linear model is enough |
-| XGBoost classifier | Captures nonlinear interactions between indicators |
+| [Model A] | [...] |
+| [Model B] | [...] |
 
 ### Evaluation protocol
-- **Sliding-window cross-validation** for tuning: train on past quarters, validate on the next block, roll forward. The model never trains on the future.
-- **Held-out test period** ([20XX]–2024), scored once at the end.
-- Class imbalance handled with **class weights** inside each training window.
+- Test set ([20]%) set aside before any fitting, and scored once at the end.
+- Tuning by [5]-fold [stratified] cross-validation on the training set only.
 
 ---
 
-## Results (held-out test quarters)
+## Results (test set)
 
-| Model | Recession recall | Recession F1 | Accuracy |
-|-------|------------------|--------------|----------|
-| Baseline | 0 | 0 | [ ] |
-| Logistic regression | [ ] | [ ] | [ ] |
-| XGBoost | [ ] | [ ] | [ ] |
+| Model | [Primary metric] | Beats baseline? |
+|-------|------------------|-----------------|
+| Baseline | [ ] | — |
+| [Model A] | [ ] | [Yes / No] |
+| [Model B] | [ ] | [Yes / No] |
 
 *Values are copied from the report, where they are computed.*
-
-- **Confusion matrix:** [Where the errors fall. Earlier runs predicted Stability and Boom well and confused Recession with Slowdown; confirm on the final run.]
-- **What drives predictions:** [Top indicators from logistic coefficients and XGBoost feature importance.]
 
 ### What we tried and dropped
 | Tried | Why we dropped it |
 |-------|-------------------|
-| Two-stage pipeline: forecast each indicator a quarter ahead (VAR, Prophet, XGBoost regressor), then classify the forecasts | It added a second source of error, and a wrong prediction could not be traced to either stage. Classifying directly from lagged values is simpler and [performed comparably]. |
-| SMOTE oversampling | It creates synthetic quarters by interpolating between real ones, which has no meaning in a time series, and applied before the split it leaks information. Class weights address imbalance without inventing data. |
+| [Model / feature / approach] | [...] |
 
 ---
 
 ## What the Analysis Does and Does Not Support
 
-**Supports:** [e.g., lagged indicators carry information about next quarter's regime beyond the baseline, if the test results show it.]
+**Supports:** [The claim, at exactly the strength the test results carry.]
 
 **Does not support:**
-- Causal claims about what triggers recessions; feature importance shows association, not cause.
-- Confidence about any single future recession, since the test period contains only [n] recession quarters.
-- Real-world forecasting accuracy, since the model was trained and tested on revised rather than real-time data.
+- [e.g., causal claims from observational data]
+- [e.g., populations or periods absent from the data]
+
+### Limitations
+- [Specific to this dataset, not generic]
 
 ---
 
@@ -128,8 +121,9 @@ Predict the most common regime ([Stability]) every quarter → Recession recall 
 git clone https://github.com/[user]/[repo].git
 cd [repo]
 pip install -r requirements.txt
-python src/build_features.py
+python src/get_data.py                      # skip if data/ is committed
 jupyter nbconvert --to html --execute report/report.ipynb
+# or, for Quarto: quarto render report/report.qmd
 ```
 
 Python [3.11] · Random seed: `42`
@@ -140,13 +134,11 @@ Python [3.11] · Random seed: `42`
 
 ```
 ├── data/
-│   ├── Prediction_Indicators.csv
-│   ├── lags.csv
-│   └── Regime_Labels.csv
+│   └── raw/
 ├── src/
-│   └── build_features.py     # builds lags.csv and Regime_Labels.csv
+│   └── get_data.py
 ├── report/
-│   ├── report.ipynb          # source of every number
+│   ├── report.ipynb      # or report.qmd — source of every number
 │   └── report.html
 ├── requirements.txt
 └── README.md
@@ -156,8 +148,9 @@ Python [3.11] · Random seed: `42`
 
 ## AI Disclosure
 [Level per the course's four-level standard, and what the assistant was used for.]
+*or:* We did not use an AI assistant on this project.
 
 ---
 
 ## Conclusion
-[Two or three sentences answering the question, stated only as strongly as the test results allow.]
+[Two or three sentences answering the question, stated only as strongly as the evidence allows.]
