@@ -1,4 +1,4 @@
-Example of how to make the README template for this project to look like mine **README_TEMPLATE**[https://github.com/Makster04/FINAL_CAPSTONE_PROJECT/blob/main/README.md]
+Example of how to make the README template for this project, following our instructor's rules, to look like mine [https://github.com/Makster04/FINAL_CAPSTONE_PROJECT/blob/main/README.md]
 
 # [Project Title]: [The One-Line Question Your Model Answers]
 
