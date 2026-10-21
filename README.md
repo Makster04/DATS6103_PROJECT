@@ -1,5 +1,15 @@
 Example of how to make the README template for this project, following our instructor's rules, to look like mine [https://github.com/Makster04/FINAL_CAPSTONE_PROJECT/blob/main/README.md]
 
+Our instructors order:
+It should cover, in roughly this order:
+- the question, and the decision it informs
+- where the data came from and what is missing from it
+- what you did to the data, with reasons
+- the models, the baseline, and how they were evaluated
+- what the analysis does and does not support
+- limitations specific to your data, not generic ones
+
+
 # [Project Title]: [The One-Line Question Your Model Answers]
 
 **DATS 6103 – Introduction to Data Mining · Team Project · Fall 2026**
