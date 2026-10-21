@@ -20,17 +20,15 @@ It should cover, in roughly this order:
 ---
 
 ## The Question & the Decision
-[One or two sentences: what is being predicted or discovered.]
-- For whom: [who uses the answer]
+**Question:** [One or two sentences: what is being predicted or discovered.]
+- **For whom:** [who uses the answer]
   - Stakeholder #1:
   - Stakeholder #2:
   - Stakeholder #3:
-- The decision it changes: [what they would do differently with it]
+- **Decision Change:** [what they would do differently with it]
   - Stakeholder #1:
   - Stakeholder #2:
   - Stakeholder #3:
-
-> Predict / discover **[X]** for **[whom]**, so that they can **[decision the answer changes]**.
 
 ### Target & Metric
 | Item               | Value |
