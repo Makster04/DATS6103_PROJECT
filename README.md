@@ -21,8 +21,6 @@ It should cover, in roughly this order:
 
 ## The Question & the Decision
 [One or two sentences: what is being predicted or discovered.]
-
-### The Question
 - For whom: [who uses the answer]
   - Stakeholder #1:
   - Stakeholder #2:
