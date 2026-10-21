@@ -10,144 +10,115 @@ It should cover, in roughly this order:
 - limitations specific to your data, not generic ones
 
 
-# [Project Title]: [The One-Line Question Your Model Answers]
+# Predicting Next Quarter's Economic Regime from Lagged Macro Indicators
 
 **DATS 6103 – Introduction to Data Mining · Team Project · Fall 2026**
 **Team:** [Name 1] · [Name 2] · [Name 3]
 
-📄 **Report:** [`report/report.html`](report/report.html) · 🎤 **Slides:** [`presentation/slides.pdf`](presentation/slides.pdf)
+📄 **Report:** [`report/report.html`](report/report.html)
 
 ---
 
-## The Question & the Decision
+## The Question
 
-### Business Problem
-[2–3 sentences: who has this problem, how they handle it today, and why that falls short.]
+Can lagged macroeconomic indicators predict whether the U.S. economy will be in **Boom, Stability, Slowdown, or Recession** next quarter?
 
-### The Question
-> Predict / discover **[X]** for **[whom]**, so that they can **[decision the answer changes]**.
-
-### Primary Stakeholders
-- **[Stakeholder 1]**: [the specific decision this answer changes for them]
-- **[Stakeholder 2]**: [...]
-- **[Stakeholder 3]**: [...]
-
-### Target & Metric
-| Item               | Value |
-|--------------------|-------|
-| Target variable    | `[column_name]` |
-| Task type          | [Regression / Binary classification / Multiclass / Clustering / Association rules] |
-| Costlier mistake   | [e.g., a missed positive (FN) costs more than a false alarm (FP), because …] |
-| Primary metric     | [Recall / F1 / PR-AUC / RMSE / MAE] — chosen because [it reflects the costlier mistake] |
+- **For whom:** corporate finance leaders (CFOs) setting budgets and hiring plans.
+- **The decision it changes:** whether to tighten spending and hiring ahead of a downturn, or hold course.
+- **The costlier mistake:** missing a coming Recession. A false alarm means caution that turns out to be unnecessary; a missed recession means being caught over-extended. Models are therefore judged mainly on **Recession recall and F1**, not overall accuracy.
 
 ---
 
-## Data Understanding
+## The Data
 
-### Data Source
-- **Source:** [Dataset name](link)
-- **How to get it:** [Committed in `data/raw/`] or [run `python src/get_data.py`]
-- **Size:** [N rows × M columns] *(course minimum: 4,000 rows, 8 useful columns)*
-- **One row is:** [one loan application / one patient visit / one county-year / …]
-- **Coverage:** [time span, geography, population]
+| | |
+|---|---|
+| **Sources** | Federal Reserve Economic Data (FRED); Bureau of Labor Statistics (BLS) |
+| **Coverage** | 1970–2024, quarterly |
+| **One row is** | one quarter |
+| **Size** | ~220 quarters × 30+ indicators |
+| **Target** | regime label in `Regime_Labels.csv`, defined by [labeling rule] |
 
-### What's Missing From It
-- [Who or what is not in the data: populations, time periods, variables you would want]
-- [Missingness in key columns, and whether it looks random or systematic]
+Files in `data/`:
+- `Prediction_Indicators.csv` — the indicators as downloaded
+- `lags.csv` — lagged versions of each indicator, built by `src/build_features.py`
+- `Regime_Labels.csv` — the target, built by `[script]` using [labeling rule]
 
-### Data Preparation
-| Step               | What we did | Why | Fitted on |
-|--------------------|-------------|-----|-----------|
-| Train/test split   | [80/20, stratified on target; or time-based split if temporal] | [...] | — |
-| Dropped columns    | [IDs, post-outcome / leaky fields] | [...] | — |
-| Missing values     | [median imputation] | [...] | **Training data only** |
-| Encoding           | [one-hot for categoricals] | [...] | **Training data only** |
-| Scaling            | [StandardScaler] | [k-NN / logistic need comparable scales] | **Training data only** |
-| Feature engineering| [...] | [...] | [...] |
-
-> All fitted preprocessing lives inside a scikit-learn `Pipeline`, so it is refit on each cross-validation training fold and never sees the test set.
+### What's missing from it
+- **Real-time data.** FRED serves revised figures. A forecaster in 2007 saw first-release numbers that were later revised, so the model learns from information nobody had at the time.
+- **Recessions.** 1970–2024 contains only a handful of recession episodes, so the Recession class is small and the test period holds only [n] recession quarters.
+- [Indicators that begin after 1970 and are mostly imputed in early years]
 
 ---
 
-## Exploratory Data Analysis
-- **[Finding 1]:** [target distribution / class balance]
-- **[Finding 2]:** [strongest relationships with the target]
-- **[Finding 3]:** [something that changed how we modeled]
+## Data Preparation
+
+| Step | What we did | Why |
+|------|-------------|-----|
+| Merge | Joined the three files on `observation_date` | One row per quarter |
+| Clean | Dropped duplicate rows and fully empty columns | — |
+| Features | 25+ per quarter: lags (1–4 quarters), rolling means and standard deviations, stress flags | Regime shifts build over several quarters |
+| Missing values | Filled with column means **computed on the training window only** | Keeps later values from leaking into earlier quarters |
+
+All fitted steps (imputation, scaling) sit inside a scikit-learn `Pipeline` and are refit on each training window.
 
 ---
 
-## Modeling Approach
+## Exploration
+
+- [How often each regime occurs, and how rare Recession is]
+- [Which indicators visibly move before regime changes]
+- [Anything that shaped the modeling choices]
+
+---
+
+## Models and Evaluation
 
 ### Baseline
-- [Majority class ("[class]") → [metric] = X] *or* [Mean of target → RMSE = X]
-- Any model that does not clearly beat this has learned nothing useful.
+Predict the most common regime ([Stability]) every quarter → Recession recall = 0, accuracy = [x].
 
 ### Models
-| Model                         | Why it suits this question | Hyperparameters tuned |
-|-------------------------------|----------------------------|-----------------------|
-| [Logistic / Linear regression]| [interpretable coefficients, …] | [C, penalty] |
-| [Random forest / Gradient boosting] | [nonlinear effects, interactions, …] | [max_depth, n_estimators] |
-| [k-NN / Clustering / Association rules] | [...] | [k, …] |
+| Model | Why it suits the question |
+|-------|---------------------------|
+| Multinomial logistic regression | Interpretable coefficients; tests whether a linear model is enough |
+| XGBoost classifier | Captures nonlinear interactions between indicators |
 
-### Evaluation Protocol
-- Held-out test set ([20]%) set aside before any fitting, and consulted **once**, at the end.
-- Hyperparameters tuned with [5]-fold [stratified] cross-validation on the training set only.
-- [If imbalanced: class weights or resampling applied *inside* each CV fold, never before the split.]
+### Evaluation protocol
+- **Sliding-window cross-validation** for tuning: train on past quarters, validate on the next block, roll forward. The model never trains on the future.
+- **Held-out test period** ([20XX]–2024), scored once at the end.
+- Class imbalance handled with **class weights** inside each training window.
 
 ---
 
-## Results
+## Results (held-out test quarters)
 
-### Key Metrics (held-out test set)
-| Model        | [Primary metric] | [Secondary metric] | Beats baseline? |
-|--------------|------------------|--------------------|-----------------|
-| Baseline     | [ ]              | [ ]                | —               |
-| [Model A]    | [ ]              | [ ]                | [Yes / No]      |
-| [Model B]    | [ ]              | [ ]                | [Yes / No]      |
+| Model | Recession recall | Recession F1 | Accuracy |
+|-------|------------------|--------------|----------|
+| Baseline | 0 | 0 | [ ] |
+| Logistic regression | [ ] | [ ] | [ ] |
+| XGBoost | [ ] | [ ] | [ ] |
 
-*These values are copied from the final cell of the report, where they are computed.*
+*Values are copied from the report, where they are computed.*
 
-### What Didn't Work
-| Tried               | Result | Why we dropped it |
-|---------------------|--------|-------------------|
-| [Model / feature / approach] | [...] | [...] |
+- **Confusion matrix:** [Where the errors fall. Earlier runs predicted Stability and Boom well and confused Recession with Slowdown; confirm on the final run.]
+- **What drives predictions:** [Top indicators from logistic coefficients and XGBoost feature importance.]
 
-### Evaluation Visuals
-- **Confusion matrix:** [where the model confuses classes, and which errors matter]
-- **[PR / ROC curve or residual plot]:** [...]
-- **Coefficients / feature importance:** [what drives predictions]
+### What we tried and dropped
+| Tried | Why we dropped it |
+|-------|-------------------|
+| Two-stage pipeline: forecast each indicator a quarter ahead (VAR, Prophet, XGBoost regressor), then classify the forecasts | It added a second source of error, and a wrong prediction could not be traced to either stage. Classifying directly from lagged values is simpler and [performed comparably]. |
+| SMOTE oversampling | It creates synthetic quarters by interpolating between real ones, which has no meaning in a time series, and applied before the split it leaks information. Class weights address imbalance without inventing data. |
 
 ---
 
 ## What the Analysis Does and Does Not Support
 
-**Supported by the evidence:**
-- [Claim, at exactly the strength the test-set results carry]
+**Supports:** [e.g., lagged indicators carry information about next quarter's regime beyond the baseline, if the test results show it.]
 
-**Not supported:**
-- [e.g., causal claims — this is observational data]
-- [e.g., generalizing to populations or periods absent from the data]
-
-### Limitations (specific to this data)
-- [Not generic ones — what about *this* dataset limits the conclusions]
-
----
-
-## Recommendations
-
-| Stakeholder       | Recommendation | Caveat |
-|-------------------|----------------|--------|
-| [Stakeholder 1]   | [...]          | [...]  |
-| [Stakeholder 2]   | [...]          | [...]  |
-
----
-
-## 🔮 Next Steps
-
-| Phase         | Action |
-|---------------|--------|
-| **Near-Term** | [...]  |
-| **Long-Term** | [...]  |
+**Does not support:**
+- Causal claims about what triggers recessions; feature importance shows association, not cause.
+- Confidence about any single future recession, since the test period contains only [n] recession quarters.
+- Real-world forecasting accuracy, since the model was trained and tested on revised rather than real-time data.
 
 ---
 
@@ -157,12 +128,11 @@ It should cover, in roughly this order:
 git clone https://github.com/[user]/[repo].git
 cd [repo]
 pip install -r requirements.txt
-python src/get_data.py                      # skip if data/ is committed
+python src/build_features.py
 jupyter nbconvert --to html --execute report/report.ipynb
-# or, for Quarto: quarto render report/report.qmd
 ```
 
-Python [3.11] · Runtime ≈ [X] min · Random seed: `42`
+Python [3.11] · Random seed: `42`
 
 ---
 
@@ -170,16 +140,14 @@ Python [3.11] · Runtime ≈ [X] min · Random seed: `42`
 
 ```
 ├── data/
-│   ├── raw/              # original download (or fetched by get_data.py)
-│   └── processed/
-├── notebooks/            # exploratory scratch work
+│   ├── Prediction_Indicators.csv
+│   ├── lags.csv
+│   └── Regime_Labels.csv
 ├── src/
-│   └── get_data.py       # downloads the dataset
+│   └── build_features.py     # builds lags.csv and Regime_Labels.csv
 ├── report/
-│   ├── report.ipynb      # or report.qmd — source of every number
-│   └── report.html       # rendered report (graded deliverable)
-├── presentation/
-│   └── slides.pdf
+│   ├── report.ipynb          # source of every number
+│   └── report.html
 ├── requirements.txt
 └── README.md
 ```
@@ -188,21 +156,8 @@ Python [3.11] · Runtime ≈ [X] min · Random seed: `42`
 
 ## AI Disclosure
 [Level per the course's four-level standard, and what the assistant was used for.]
-*or:* We did not use an AI assistant on this project.
-
-*(The full statement also appears in the report.)*
-
----
-
-## Team & Contributions
-
-| Member     | Contributions |
-|------------|---------------|
-| [Name 1]   | [...]         |
-| [Name 2]   | [...]         |
-| [Name 3]   | [...]         |
 
 ---
 
 ## Conclusion
-[3–4 sentences: the answer to the question, stated no more strongly than the evidence allows, and the decision it informs.]
+[Two or three sentences answering the question, stated only as strongly as the test results allow.]
