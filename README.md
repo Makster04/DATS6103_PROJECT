@@ -24,10 +24,13 @@ It should cover, in roughly this order:
 [One or two sentences: what is being predicted or discovered.]
 
 - **For whom:** [who uses the answer]
-- - Stakeholder #1
-- - Stakeholder #2
-- - Stakeholder #3
+  - Stakeholder #1:
+  - Stakeholder #2:
+  - Stakeholder #3:
 - **The decision it changes:** [what they would do differently with it]
+  - Stakeholder #1:
+  - Stakeholder #2:
+  - Stakeholder #3:
 - **The costlier mistake:** [which error matters more, and why]
 - **Primary metric:** [Recall / F1 / PR-AUC / RMSE / MAE], chosen because [it reflects the costlier mistake]
 
