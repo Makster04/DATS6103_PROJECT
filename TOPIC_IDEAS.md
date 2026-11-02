@@ -9,9 +9,9 @@ worker profile as low, medium, or high layoff risk?
 **TEAM** Mak Trnka | Galileo Frank Perricone | Miguel Sanchez Zanella
 
 ## 01 THE QUESTION
-**Prediction:** The target is Layoff_Risk (Low / Medium / High). For a data-mining instructor or workforce researcher
-testing methods, the decision is whether an interpretable classifier or a flexible ensemble better recovers patterns in
-simulated AI-exposure data. This is not a tool for actual personnel decisions.
+**Prediction:** The target is ***Layoff_Risk (Low / Medium / High)***. For a data-mining instructor or workforce researcher
+testing methods, the decision is ***whether an interpretable classifier or a flexible ensemble better recovers patterns in
+simulated AI-exposure data***. This is not a tool for actual personnel decisions.
 
 ## 02 THE DATA
 Download the linked Kaggle CSV and save a fixed copy in data/raw/. Published size: 20,000 rows x 16 columns; each
@@ -26,7 +26,7 @@ automated-task share by class, plus AI-adoption and industry cross-tabs. Examine
 determines the label before modeling.
 
 ## 04 MODELING
-Compare multinomial logistic regression (interpretable effects) with a random forest (nonlinear interactions),
+Compare ***multinomial logistic regression*** (interpretable effects) with a ***random forest*** (nonlinear interactions),
 against a majority-class baseline. Use an 80/20 stratified split, cross-validation, and preprocessing fitted on training
 folds only. Evaluate macro-F1 and a confusion matrix.
 
