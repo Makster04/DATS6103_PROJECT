@@ -1,9 +1,12 @@
 DATS 6103 / FALL 2026 / TEAM DECISION DRAFT
 # AI Exposure and Simulated Layoff Risk
-LOWER DATA RISK | SYNTHETIC OBSERVATIONS
-THE ONE-LINE QUESTION Can job characteristics and AI-automation measures classify a simulated
+
+**LOWER DATA RISK | SYNTHETIC OBSERVATIONS**
+
+**THE ONE-LINE QUESTION** Can job characteristics and AI-automation measures classify a simulated
 worker profile as low, medium, or high layoff risk?
-TEAM Mak Trnka | Galileo Frank Perricone | Miguel Sanchez Zanella
+
+**TEAM** Mak Trnka | Galileo Frank Perricone | Miguel Sanchez Zanella
 
 ## 01 THE QUESTION
 Prediction: The target is Layoff_Risk (Low / Medium / High). For a data-mining instructor or workforce researcher
