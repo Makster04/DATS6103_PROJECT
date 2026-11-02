@@ -9,7 +9,7 @@ worker profile as low, medium, or high layoff risk?
 **TEAM** Mak Trnka | Galileo Frank Perricone | Miguel Sanchez Zanella
 
 ## 01 THE QUESTION
-Prediction: The target is Layoff_Risk (Low / Medium / High). For a data-mining instructor or workforce researcher
+**Prediction:** The target is Layoff_Risk (Low / Medium / High). For a data-mining instructor or workforce researcher
 testing methods, the decision is whether an interpretable classifier or a flexible ensemble better recovers patterns in
 simulated AI-exposure data. This is not a tool for actual personnel decisions.
 
