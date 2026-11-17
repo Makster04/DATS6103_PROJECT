@@ -1,0 +1,6 @@
+,Routine_Task_Percentage,Routine_Task_Percentage,Routine_Task_Percentage,Tasks_Automated_Percentage,Tasks_Automated_Percentage,Tasks_Automated_Percentage,Creativity_Requirement,Creativity_Requirement,Creativity_Requirement,Human_Interaction_Level,Human_Interaction_Level,Human_Interaction_Level,Number_of_AI_Tools_Used,Number_of_AI_Tools_Used,Number_of_AI_Tools_Used,AI_Usage_Hours_Per_Week,AI_Usage_Hours_Per_Week,AI_Usage_Hours_Per_Week,AI_Training_Hours,AI_Training_Hours,AI_Training_Hours
+,mean,min,max,mean,min,max,mean,min,max,mean,min,max,mean,min,max,mean,min,max,mean,min,max
+Layoff_Risk,,,,,,,,,,,,,,,,,,,,,
+High,75.12819569615597,24,94,55.99209122677947,16,93,23.871620378885414,0,83,56.09564097848078,20,99,3.816258966341733,0,10,10.804855618907485,0,30,20.397461835571086,0,79
+Low,28.49981067777357,10,93,19.448882998864068,4,68,71.96497538811056,4,100,64.60469519121546,20,99,1.2500946611132147,0,10,3.253123816736085,0,30,5.950397576675502,0,78
+Medium,51.15243325127817,10,94,35.712365082370766,5,92,48.37663321340655,0,100,59.62734330619201,20,99,2.2793031622798714,0,10,6.163605377769362,0,30,11.323612952092407,0,79

@@ -1,0 +1,10 @@
+Idea,Story,Model,Features,CV accuracy,CV macro F1,Fold F1 SD
+T1,Where do routine tasks become high risk?,tree,Routine_Task_Percentage; Tasks_Automated_Percentage,0.6865625,0.685571970247392,0.010046055908924321
+T1,Where do routine tasks become high risk?,tree,Routine_Task_Percentage; Tasks_Automated_Percentage,0.6865625,0.685571970247392,0.010046055908924321
+T1,Where do routine tasks become high risk?,tree,Routine_Task_Percentage; Tasks_Automated_Percentage,0.6865625,0.685571970247392,0.010046055908924321
+T1,Where do routine tasks become high risk?,tree,Routine_Task_Percentage; Tasks_Automated_Percentage,0.6865625,0.685571970247392,0.010046055908924321
+T2,Does AI adoption modify automation risk?,tree,Tasks_Automated_Percentage; AI_Adoption_Level; Number_of_AI_Tools_Used,0.6673125,0.6555726349876652,0.0033020469729853285
+T3,"Creative, people-facing, senior jobs",forest,Creativity_Requirement; Human_Interaction_Level; Job_Level,0.7323125,0.7259840611943853,0.009515328100309854
+R1,A smooth risk gradient rather than fixed thresholds,logit,Routine_Task_Percentage; Tasks_Automated_Percentage,0.69625,0.6920165943181086,0.00452118026207637
+R2,"Tools, usage, and training: correlated exposure",logit,Number_of_AI_Tools_Used; AI_Usage_Hours_Per_Week; AI_Training_Hours,0.5608125,0.5035176499050089,0.007083099400938192
+R3,Seniority shifts the automation risk curve,logit,Tasks_Automated_Percentage; Human_Interaction_Level; Job_Level,0.74025,0.7398410940308126,0.009857892894574845
