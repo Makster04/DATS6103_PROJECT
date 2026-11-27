@@ -1,39 +1,39 @@
 DATS 6103 / FALL 2026 / TEAM DECISION DRAFT
-# AI Exposure and Simulated Layoff Risk
 
-**LOWER DATA RISK | SYNTHETIC OBSERVATIONS**
+# Forecasting the Next Breakout Exports
 
-**THE ONE-LINE QUESTION** Can job characteristics and AI-automation measures classify a simulated
-worker profile as low, medium, or high layoff risk?
+**BINARY CLASSIFICATION | ANNUAL EXPORT DATA**
 
-**TEAM** Mak Trnka | Galileo Frank Perricone | Miguel Sanchez Zanella
+**THE ONE-LINE QUESTION** Among commodities currently outside their country’s top 10% of exports by dollar value, which features best predict entry into the top 10% the following year?
+
+**TEAM** Mak Trnka | Galileo Perricone | Miguel Sanchez
 
 ## 01 THE QUESTION
-**Prediction:** The target is ***Layoff_Risk (Low / Medium / High)***. For a data-mining instructor or workforce researcher
-testing methods, the decision is ***whether an interpretable classifier or a flexible ensemble better recovers patterns in
-simulated AI-exposure data***. This is not a tool for actual personnel decisions.
+
+**Prediction** — For each eligible commodity, we will predict whether it **enters its country’s top 10%** the following year (1) or **remains below the cutoff** (0).
+
+**Audience and decision** — Export-promotion agencies could use the forecast to prioritize exporter outreach. Market research teams could use it to choose which emerging products to investigate.
 
 ## 02 THE DATA
-Download the linked Kaggle CSV and save a fixed copy in data/raw/. Published size: 20,000 rows x 16 columns; each
-row is one synthetic employee/job profile. Fields include industry, role, company size, routine-task share, AI
-adoption, automated tasks, and training hours. The file lacks observed job losses, identifiable employers, and
-validated economic conditions. Main obstacle: the target labels are synthetic and may follow a simple, invented
-scoring rule.
+
+The United Nations’ *Global Commodity Trade Statistics* CSV contains **8,225,871 rows and 10 columns**. Each source row records one country’s annual trade in a commodity for a given trade flow. We will use eight fields: country, year, commodity code, trade flow, dollar value, weight, commodity category, and quantity unit. Each modeling row will represent one country–commodity pair in one forecast year.
+
+**Coverage and limitations** — Missing product records can shift national rankings. We will check coverage by country and year, leave unverifiable outcomes unlabeled, and examine missing weights by quantity unit. A commodity can also enter the top 10% when exports of higher-ranked products fall.
 
 ## 03 EXPLORATION
-Audit duplicates, missingness, categorical levels and risk-class balance; plot distributions of routine-task share and
-automated-task share by class, plus AI-adoption and industry cross-tabs. Examine whether any single variable nearly
-determines the label before modeling.
+
+We will select export records, exclude aggregate totals, check for duplicates and gaps, and flag percentage growth rates with a zero starting value. We will rank commodities by dollar value within each country and year. Using training years only, we will compare entry rates by commodity category and by how close each product was to the previous year’s cutoff.
 
 ## 04 MODELING
-Compare ***multinomial logistic regression*** (interpretable effects) with a ***random forest*** (nonlinear interactions),
-against a majority-class baseline. Use an 80/20 stratified split, cross-validation, and preprocessing fitted on training
-folds only. Evaluate macro-F1 and a confusion matrix.
+
+We will compare **binary logistic regression** and a **random forest classifier** using eight predictors: three annual export growth rates, two years of export value shares, two years of export weight shares, and commodity category.
+
+We will train and validate in chronological order through **2012**, fitting preprocessing on training data only. To identify which features help most, we will remove one predictor group at a time, retrain each model, and measure the change in validation F1.
+
+On the **2013–2016 test years**, we will compare both models with a majority-class baseline and a rule that selects products closest to the previous year’s cutoff. Our primary metric is **F1 for products entering the top 10%**. It balances **precision** (how many shortlisted products actually entered) and **recall** (how many actual entrants the model identified). We will report both measures and a confusion matrix for each model.
 
 ## 05 ACCOUNT OF THE FINDINGS
-Produce a reproducible written report and a short oral presentation with EDA plots, model comparison, errors by
-class, and sensitivity to dominant features. The conclusion can establish performance within the synthetic dataset
-only, not actual AI-caused layoffs or a worker's real risk.
 
-**DATASET LINK Kaggle:** [AI Impact on Jobs and Layoff Risk Dataset](https://www.kaggle.com/datasets/shivasingh4945/ai-impact-on-jobs-and-layoff-risk-dataset)
-Source counts are published descriptions and will be checked against the downloaded CSV before submission.
+An **HTML report** and a **short team presentation** will show which predictor groups helped most and how many entrants each model found compared with the cutoff rule at the same shortlist size. Country–commodity examples will illustrate false alarms and missed entrants. The report will disclose AI use, and the GitHub repository will include the analysis and instructions to reproduce it.
+
+**DATASET LINK** — [United Nations Global Commodity Trade Statistics on Kaggle](https://www.kaggle.com/datasets/unitednations/global-commodity-trade-statistics)
