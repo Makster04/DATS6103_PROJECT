@@ -1,4 +1,4 @@
-# Workforce Under Automation: AI Exposure and Synthetic Layoff Risk
+# Forecasting the Next Breakout Exports
 
 **DATS 6103 · Fall 2026**  
 **Team:** Mak Trnka, Galileo Frank Perricone, and Miguel Sanchez Zanella
@@ -7,20 +7,20 @@
 
 ### Research Question
 
-This project will examine whether job and AI exposure characteristics can predict a profile’s assigned synthetic layoff risk category.
+Each year, a country’s export rankings show which commodities bring in the most money. We will use past trade records to forecast which products could join that leading group next year.
 
-> **Our question:** How well can a random forest classifier and a multinomial logistic regression model predict whether a synthetic worker profile is labeled Low, Medium, or High risk?
+> **Our question:** Among commodities currently outside their country’s top 10% of exports by dollar value, which features best predict entry into the top 10% the following year?
 
 ### Who Cares and Why
 
-- **Job seekers:** The results may show which job or AI exposure characteristics are associated with higher assigned risk categories in this dataset.
-- **Human resources teams and labor agencies:** The results may point to patterns worth investigating with real workforce data.
+- **Export-promotion agencies** can use a watchlist to prioritize outreach to exporters of promising products.
+- **Market research teams** can use the same watchlist to decide which commodities deserve a closer look.
 
 ### Decision the Answer Could Inform
 
-Because the data is synthetic, this analysis cannot guide decisions about individual workers. It can help determine whether the patterns in the dataset are clear enough to warrant further study using real-world data.
+Both groups have limited time to review products. One approach is to watch the commodities that finished just below last year’s cutoff. Another is to use export growth, export shares, and commodity category to build a watchlist.
 
-> The findings could help researchers or labor agencies decide whether to investigate similar patterns with observed workforce and layoff data.
+> For the same number of products reviewed, which approach identifies more commodities that enter the top 10% the following year?
 
 ---
 
@@ -28,65 +28,76 @@ Because the data is synthetic, this analysis cannot guide decisions about indivi
 
 ### Data Source
 
-- **Dataset:** *AI Impact on Jobs and Layoff Risk*
-- **Source:** Kaggle
-- **Time period and scope:** The dataset is described as containing 20,000 synthetic worker profiles and 16 columns. These counts will be checked after downloading the CSV. The proposal does not specify a time period.
+- **Dataset:** *Global Commodity Trade Statistics*
+- **Source:** United Nations, available through [Kaggle](https://www.kaggle.com/datasets/unitednations/global-commodity-trade-statistics).
+- **Size and scope:** The CSV contains **8,225,871 rows and 10 columns**. We use annual product-level export records and exclude aggregate totals to avoid double counting.
+- **Study period:** We use forecast years through **2011** for training, **2012** for validation, and **2013–2016** for final testing.
 
 ### Unit of Observation
 
-> Each row represents one synthetic worker profile with job and AI exposure characteristics and an assigned layoff risk category.
+A source row records one country’s annual trade in one commodity for a given trade flow, such as exports or imports.
+
+> Each modeling row represents **one country–commodity pair in one forecast year**. For example, a 2013 forecast uses information available through 2012. The product’s 2013 rank determines the outcome.
 
 ### Important Variables
 
+We use eight source fields: country, year, commodity code, trade flow, dollar value, weight, commodity category, and quantity unit. From these fields, we build the binary outcome and eight predictors.
+
 | Role | Variable(s) | What they represent |
 |---|---|---|
-| Outcome or target | Assigned layoff risk category | The synthetic label to predict: Low, Medium, or High |
-| Candidate predictors | Industry, job role, company size, routine-task percentage, AI adoption, automated-task percentage, AI use, training hours | Job and AI exposure characteristics that may help distinguish the assigned categories |
-| Other relevant fields | Remaining dataset columns | Additional fields will be reviewed after the CSV is downloaded and may be included if they are relevant and appropriate |
+| Outcome | Entry into the top 10% | Among products previously below the cutoff, **1** means the product enters its country’s top 10% the following year. **0** means it remains below the cutoff. |
+| Predictors 1–3 | Three annual export growth rates | The year-over-year percentage change in the product’s export value for each of the three preceding years. |
+| Predictors 4–5 | Two annual export value shares | The product’s share of its country’s reported export value in each of the two most recent years. |
+| Predictors 6–7 | Two annual export weight shares | The product’s share of its country’s reported export weight in those same two years. |
+| Predictor 8 | Commodity category | The broader group to which the product belongs. |
+| Identification and quality checks | Country, year, commodity code, trade flow, and quantity unit | Identify export records, link products across years, and check whether missing weights are more common for particular quantity units. |
 
 ### Coverage and Limitations
 
-The profiles and risk labels are synthetic; they do not represent real workers or observed layoffs. The risk labels may also have been generated using the same characteristics we plan to use as predictors. If so, the models could learn the dataset’s label-generation rules rather than patterns that apply to actual workers.
+Our coverage check identified **100 countries** with at least one eligible commodity in the training period, in 2012, and in each test year from 2013 through 2016. Missing product records can shift national rankings, and missing or estimated weights can distort weight shares. We will leave the outcome unlabeled when a product’s following-year rank cannot be verified.
 
-> Results will describe how well the models predict labels in this dataset. They cannot establish the layoff risk of real workers or show that AI exposure causes layoffs.
+> A breakout measures a change in **rank within a country’s export mix**. A commodity can enter the top 10% because its own exports grew or because higher-ranked exports fell.
 
 ---
 
 ## 3. Exploratory Analysis
 
-Before modeling, we will check the dataset’s structure and look for patterns that may affect the analysis.
+Before modeling, we will use the training data to examine how often products enter the top 10% and what those products looked like a year earlier.
 
-- Verify the number of rows and columns, and inspect the available variables.
-- Check for duplicate records, missing values, unusual values, and category levels.
-- Examine the balance of the Low, Medium, and High risk categories.
-- Compare routine-task percentage, automated-task percentage, AI adoption, and industry across the assigned risk categories.
-- Use tables and visualizations to identify patterns and possible problems with the data.
+- Check for duplicate country–commodity–year records, missing years, and zero starting values that make percentage growth undefined.
+- Examine country and commodity coverage over time and check missing weights by quantity unit.
+- Compare how often eligible products **enter the top 10%** versus **remain below the cutoff**.
+- Compare entry rates across commodity categories and by distance from the previous year’s cutoff.
+- Examine relationships among export growth, value shares, and weight shares using a correlation heatmap.
 
-> This exploration will help us understand the dataset, assess whether the planned models are suitable, and identify any limits that should shape how we interpret the results.
+> A chart of entry rates by prior rank will show how informative the cutoff already is. That gives us a practical benchmark for judging the forecasts.
 
 ---
 
 ## 4. Modeling Plan
 
-We will compare two supervised classification methods and a simple baseline.
+We will compare two supervised classification methods using the same eight predictors, eligible products, and forecast years.
 
 ### Method 1: Random Forest Classifier
 
-- **Purpose:** Predict whether a profile is assigned Low, Medium, or High synthetic risk.
-- **Why it fits:** A random forest can model patterns across multiple characteristics and can capture relationships that are not strictly linear.
-- **Planned inputs and outcome:** Candidate job and AI exposure characteristics as inputs; assigned risk category as the outcome.
+- **Purpose:** Estimate which commodities are likely to enter the top 10% the following year.
+- **Why it fits:** A random forest can capture nonlinear relationships and interactions. For example, recent growth may be more informative for a product that already accounts for a larger share of national export value.
+- **Inputs and outcome:** Three annual growth rates, two value shares, two weight shares, and commodity category predict whether a product enters the top 10%.
 
-### Method 2: Multinomial Logistic Regression
+### Method 2: Binary Logistic Regression
 
-- **Purpose:** Predict the same three risk categories.
-- **Why it fits:** This provides a second approach to the classification task and can offer a useful comparison with the random forest.
-- **Planned inputs and outcome:** Candidate job and AI exposure characteristics as inputs; assigned risk category as the outcome.
+- **Purpose:** Estimate the probability that a commodity enters the top 10% the following year.
+- **Why it fits:** Logistic regression provides an interpretable comparison. Its coefficients describe how each predictor relates to the estimated odds of entry while holding the other predictors constant.
+- **Inputs and outcome:** We use the same eight predictors and binary outcome as the random forest so the models can be compared directly.
 
 ### Baseline and Model Comparison
 
-We will compare both models with a baseline that always predicts the most common risk category. Evaluation will use accuracy, macro-averaged precision, macro-averaged F1, and a confusion matrix.
+- **Majority-class baseline:** Always predict the most common outcome in the training data.
+- **Closest-to-cutoff baseline:** Select the products ranked just below the previous year’s top 10%. Match each model’s watchlist size within each country and forecast year.
+- **Validation:** Fit preprocessing on training data only. Use 2012 to select each model’s classification threshold. Remove one feature group at a time and measure the change in validation F1 to assess its contribution.
+- **Final evaluation:** Refit the models using data through 2012 and evaluate them on **2013–2016**. Our primary metric is **F1 for products entering the top 10%**. We will also report precision, recall, and a confusion matrix for each model.
 
-> We will consider whether each model improves on the baseline, how well it performs across all three categories, and which types of profiles it tends to misclassify. These results will describe performance on synthetic labels only.
+> **Precision** tells us what share of the watchlist actually entered the top 10%. **Recall** tells us what share of all actual entrants the watchlist captured. **F1** summarizes the balance between the two.
 
 ---
 
@@ -94,9 +105,8 @@ We will compare both models with a baseline that always predicts the most common
 
 We will present the project in a written report and a short oral presentation.
 
-- **Written report:** Describe the research question, dataset, exploratory analysis, models, results, and limitations.
-- **Presentation:** Explain the main patterns and model comparison, and clarify what the findings can and cannot tell us.
-- **Visuals:** Include exploratory visualizations, model performance comparisons, and examples of classification errors.
+- **Written report:** An HTML report will document the data preparation, exploratory analysis, model comparisons, limitations, and AI use. The GitHub repository will include the analysis and instructions for reproducing it.
+- **Presentation:** We will open with the watchlist decision, explain how a product qualifies as a new top-10% export, and show how each model performed against the cutoff rule.
+- **Visuals:** A two-year rank diagram will illustrate entry. A bar chart will show entry rates by distance from the cutoff. A feature comparison chart will show changes in validation F1, and confusion matrices will show false alarms and missed entrants.
 
-> We will explain how well the models predicted the synthetic categories, where they made mistakes, and why the results should not be treated as conclusions about real workers or actual layoffs.
-
+> We will close by showing which feature groups contributed most and how many new top-10% exports each approach identified for the same amount of review.
